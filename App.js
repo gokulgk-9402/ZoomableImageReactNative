@@ -14,6 +14,9 @@ export default function App() {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
 
+  const focalX = useSharedValue(0);
+  const focalY = useSharedValue(0);
+
   const pressed = useSharedValue(false);
 
   const offsetX = useSharedValue(0);
@@ -37,7 +40,16 @@ export default function App() {
     });
 
   const pinchGesture = Gesture.Pinch()
+    .onBegin((e) => {
+      // console.log(e.focalX, e.focalY);
+      if (e.numberOfPointers == 2) {
+        focalX.value = e.focalX;
+        focalY.value = e.focalY;
+      }
+    })
     .onUpdate((e) => {
+      // focalX.value = e.focalX;
+      // focalY.value = e.focalY;
       scale.value = savedScale.value * e.scale;
     })
     .onEnd(() => {
@@ -51,7 +63,8 @@ export default function App() {
       savedOffsetX.value = withTiming(0);
       savedOffsetX.value = withTiming(0);
       savedScale.value = withTiming(1);
-      scale.value = withTiming(1);
+      if (scale.value == 1) scale.value = withTiming(4);
+      else scale.value = withTiming(1);
       offsetX.value = withTiming(0);
       offsetY.value = withTiming(0);
     });
@@ -64,9 +77,17 @@ export default function App() {
 
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [
-      { translateX: offsetX.value },
-      { translateY: offsetY.value },
+      // { translateX: focalX.value },
+      // { translateY: focalY.value },
+      // { translateX: -100 },
+      // { translateY: -150 },
       { scale: scale.value },
+      // { translateX: -focalX.value },
+      // { translateY: -focalY.value },
+      // { translateX: 100 },
+      // { translateY: 150 },
+      { translateX: offsetX.value / scale.value },
+      { translateY: offsetY.value / scale.value },
     ],
     backgroundColor: pressed.value ? "#FFE04B" : "#b58df1",
   }));
@@ -96,15 +117,12 @@ const styles = StyleSheet.create({
     backgroundColor: "yellow",
   },
   box: {
-    height: 200,
-    width: 200,
     backgroundColor: "#b58df1",
-    borderRadius: 20,
     marginBottom: 30,
-    padding: 5,
+    padding: 10,
   },
   image: {
-    height: "100%",
-    width: "100%",
+    height: 300,
+    width: 200,
   },
 });
